@@ -1,7 +1,7 @@
 # lib_sign
 **lib_sign** is a simple library allowing you to write on the Sign GUI/Screen.
 
-**Current Version:** 1.0
+**Current Version:** 1.0.0
 
 **Updated On:** January 9th, 2026
 
