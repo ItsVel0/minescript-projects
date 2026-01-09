@@ -2,7 +2,9 @@
 **lib_sign** is a simple library allowing you to write on the Sign GUI/Screen.
 
 **Current Version:** 1.0
+
 **Updated On:** January 9th, 2026
+
 **Supported Minecraft Versions**: 1.21.5, 1.21.7, 1.21.8 (1.21.10 and 1.21.11 at a later date)
 
 ---
