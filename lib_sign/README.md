@@ -82,6 +82,7 @@ Sign.close_screen()
 ### `Sign`
 This is **lib_sign**'s main (and only) class.
 
+
 ### `Sign.write()`
 This method allows you to write text in a sign screen.
 Keep in mind it expects a sign screen **with no text** to already be open.
@@ -109,6 +110,7 @@ Keep in mind it expects a sign screen **with no text** to already be open.
 #### Returns
 `success: bool` - `True` if writing started successfully, `False` otherwise (i.e. if no sign screen was found)
 
+
 ### `Sign.is_writing()`
 This method allows you to know if there is a writing process ongoing.
 Mainly used to block script execution until writing has finished.
@@ -116,6 +118,7 @@ Mainly used to block script execution until writing has finished.
 None.
 #### Returns
 `is_writing: bool` - `True` if an ongoing writing process exists, `False` otherwise.
+
 
 ### `Sign.close_screen()`
 This method allows you to close the current sign screen.
