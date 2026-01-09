@@ -1,0 +1,190 @@
+#!python
+"""
+Version: 1.0.0
+Released: January 9th, 2026
+Author: ItsVelo
+"""
+import minescript as __ms
+
+__Random = JavaClass("java.util.Random")()
+__GLFW = JavaClass("org.lwjgl.glfw.GLFW")
+__Minecraft = JavaClass("net.minecraft.client.Minecraft")
+__mc = __Minecraft.getInstance()
+__font = __mc.font
+
+
+__PREFIX = "§e[§f sign_lib §e]§f"
+__MAX_LINE_WIDTH = 90
+__SIGN_SCREEN_CLASS_NAME = "net.minecraft.class_498"
+__NEXT_LINE_KEY = __GLFW.GLFW_KEY_DOWN
+__CLOSE_SCREEN_KEY = __GLFW.GLFW_KEY_ESCAPE
+
+def __random_between(min_val: float, max_val: float) -> float:
+    """Generates a random float between a minimum and maximum value (inclusive).
+
+    Args:
+        min_val: The minimum possible float value.
+        max_val: The maximum possible float value.
+
+    Returns:
+        A random float between `min_val` and `max_val`.
+    """
+    return min_val + (max_val - min_val) * __Random.nextFloat()
+
+class Sign:
+    """lib_sign's main (and only) class for interacting with Minecraft signs.
+
+    This class provides methods to write text on sign screens, check the writing status,
+    and close the sign screen.
+    """
+    __render_event_listener = None
+
+    def is_writing(self) -> bool:
+        """Checks if there is an ongoing writing process.
+
+        Mainly used to block script execution until writing has finished.
+
+        Returns:
+            True if an ongoing writing process exists, False otherwise.
+        """
+        return self.__render_event_listener != None
+    
+    def close_screen(self, screen = None) -> bool:
+        """Closes the current sign screen.
+
+        Args:
+            screen: The sign screen to close. If None, the currently opened screen
+                    will be obtained from `mc`.
+
+        Returns:
+            True if the sign screen closed successfully, False otherwise (e.g., if
+            no sign screen was found).
+        """
+        if screen is None:
+            screen = __mc.screen
+        if not self.__ensure_screen(screen):
+            return False
+        screen.keyPressed(__GLFW.GLFW_KEY_ESCAPE, 0, 0)
+        return True
+
+    def write(self, text: str, min_delay: float = 0.05, max_delay: float = 0.1, autowrap: bool = False, close_screen_when_done: bool = False) -> bool:
+        """Writes text in a sign screen.
+
+        This method expects a sign screen with no text to already be open.
+
+        Args:
+            text: The text to be written. If it exceeds the max length of a Sign line,
+                  that line will get cut off - use '\\n' to avoid this.
+                  Alternatively, use the `autowrap` argument.
+            min_delay: The minimum delay between keystrokes/characters.
+                       Default Value: 0.05
+            max_delay: The maximum delay between keystrokes/characters.
+                       Default Value: 0.1
+            autowrap: If True, will attempt to autowrap the text. Could still cause
+                      the text to be cut off if it is too long to fit in 4 lines.
+                      Default Value: False.
+                      Note: With the current implementation, words may be split across lines.
+            close_screen_when_done: If True, will close the screen once writing has finished.
+                                    Equivalent to calling `Sign.close_screen()` after the
+                                    writing is finished. Default Value: False.
+
+        Returns:
+            True if writing started successfully, False otherwise (i.e., if no sign screen
+            was found or another writing process is already ongoing).
+        """
+        if self.is_writing():
+            __ms.echo(f"{__PREFIX} Error: Received request to write, but was already writing.")
+            return False
+        
+        screen = __mc.screen
+        if not self.__ensure_screen(screen):
+            return False
+
+        if autowrap:
+            text = self.__wrap(text)
+        lines = text.split("\n")
+        number_of_lines = len(lines)
+        previous_char_time = 0
+        current_line_index = 0
+        current_char_index = 0
+        delay = __random_between(min_delay, max_delay)
+
+        def _on_render(event: __ms.RenderEvent):
+            nonlocal screen
+            nonlocal previous_char_time
+            nonlocal current_line_index
+            nonlocal current_char_index
+            nonlocal delay
+
+            if previous_char_time == 0:
+                previous_char_time = event.time
+                return
+
+            if event.time - previous_char_time > delay:
+                if current_char_index < len(lines[current_line_index]):
+                    screen.charTyped(JavaString(lines[current_line_index]).charAt(current_char_index), JavaInt(0))
+                    previous_char_time = event.time
+                    current_char_index += 1
+                    delay = __random_between(min_delay, max_delay)
+                
+                if current_char_index == len(lines[current_line_index]): # last character of current line
+                    if current_line_index == number_of_lines - 1: # last char of last line; done
+                        if close_screen_when_done:
+                            self.close_screen(screen)
+                        __ms.remove_event_listener(self.__render_event_listener)
+                        self.__render_event_listener = None
+                        return
+                    else: # go to next line
+                        current_char_index = 0
+                        current_line_index += 1
+                        delay = __random_between(min_delay, max_delay)
+                        screen.keyPressed(__NEXT_LINE_KEY, 0, 0)
+    
+        self.__render_event_listener = __ms.add_event_listener("render", _on_render)
+        return True
+    
+    def __ensure_screen(self, screen):
+        """Ensures that the provided screen is a valid Sign screen.
+
+        Args:
+            screen: The screen object to validate.
+
+        Returns:
+            True if the screen is a valid Sign screen, False otherwise.
+        """
+        if screen is None:
+            __ms.echo(f"{__PREFIX} Error: could not find Sign screen")
+            return False
+        elif screen.getClass().getName() != "net.minecraft.class_498": # net.minecraft.client.gui.screen.ingame.SignEditScreen"
+            __ms.echo(f"{__PREFIX} Error: found screen, but it wasn't a Sign")
+            return False
+        return True
+    
+    def __wrap(self, string: str) -> str:
+        """Wraps the given string to fit within the maximum line width for signs.
+
+        Note: This implementation may split words across lines.
+
+        Args:
+            string: The input string to wrap.
+
+        Returns:
+            The wrapped string with newline characters inserted for wrapping.
+        """
+        result = ""
+        current_line_width = 0
+        for ch in string:
+            if ch == "\n":
+                result += ch
+                current_line_width = 0
+                continue
+            
+            width = __font.width(ch)
+            if current_line_width + width > __MAX_LINE_WIDTH:
+                # would overflow; write in next line
+                result += f"\n{ch}"
+                current_line_width = width
+            else:
+                result += ch
+                current_line_width += width
+        return result
