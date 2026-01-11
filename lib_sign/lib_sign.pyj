@@ -1,7 +1,7 @@
 #!python
 """
-Version: 1.0.0
-Released: January 9th, 2026
+Version: 1.0.1
+Released: January 11th, 2026
 Author: ItsVelo
 """
 import minescript as __ms
