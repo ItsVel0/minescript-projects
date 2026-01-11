@@ -1,9 +1,9 @@
 # lib_sign
 **lib_sign** is a simple library allowing you to write on the Sign GUI/Screen.
 
-**Current Version:** 1.0.0
+**Current Version:** 1.0.1
 
-**Updated On:** January 9th, 2026
+**Updated On:** January 11th, 2026
 
 **Supported Minecraft Versions**: 1.21.5, 1.21.7, 1.21.8 (1.21.10 and 1.21.11 at a later date)
 
@@ -21,7 +21,11 @@
 	- 1.21.5
 	- 1.21.7
 	- 1.21.8
+- One of the following Mod Loaders:
+	- Fabric
+ 	- NeoForge
 - Minescript 5.0 (i.e. Pyjinn support)
+- Install mappings (run `\install_mappings` once in-game)
 
 ## Features
 ### Implemented
@@ -34,10 +38,8 @@
 - Deleting already-written text.
 
 ## Installation
-- Download `lib_sign.pyj` and `lib_sign.py`
-- (If you don't already have it) Download `minescript_plus.py`
+- Download `lib_sign.pyj` and `lib_sign.py (optional)`.
 - Place the file(s) in your `minescript` directory.
-- Install mappings (run `\install_mappings` once in-game)
 
 ## Quick Start
 ### With `lib_sign.py` (Recommended):
