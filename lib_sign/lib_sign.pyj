@@ -155,8 +155,9 @@ class Sign:
         if screen is None:
             __ms.echo(f"{__PREFIX} Error: could not find Sign screen")
             return False
-        elif screen.getClass().getName() != "net.minecraft.class_498": # net.minecraft.client.gui.screen.ingame.SignEditScreen"
+        elif screen.getClass().getName() not in ("net.minecraft.class_498", "net.minecraft.client.gui.screens.inventory.SignEditScreen"): # net.minecraft.client.gui.screen.ingame.SignEditScreen"
             __ms.echo(f"{__PREFIX} Error: found screen, but it wasn't a Sign")
+            __ms.echo(f"class: {screen.getClass().getName()}")
             return False
         return True
     
