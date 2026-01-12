@@ -1,11 +1,11 @@
 # lib_sign
 **lib_sign** is a simple library allowing you to write on the Sign GUI/Screen.
 
-**Current Version:** 1.0.1
+**Current Version:** 1.0.2
 
-**Updated On:** January 11th, 2026
+**Updated On:** January 12th, 2026
 
-**Supported Minecraft Versions**: 1.21.5, 1.21.7, 1.21.8 (1.21.10 and 1.21.11 at a later date)
+**Supported Minecraft Versions**: 1.21.5, 1.21.7, 1.21.8, 1.21.10, 1.21.11
 
 ---
 ## Table of Contents
@@ -21,11 +21,13 @@
 	- 1.21.5
 	- 1.21.7
 	- 1.21.8
+    - 1.21.10
+    - 1.21.11
 - One of the following Mod Loaders:
 	- Fabric
  	- NeoForge
-- Minescript 5.0 (i.e. Pyjinn support)
-- Install mappings (run `\install_mappings` once in-game)
+- Minescript 5.0b5 (i.e. Pyjinn support)
+- Installed mappings (run `\install_mappings` once in-game)
 
 ## Features
 ### Implemented
