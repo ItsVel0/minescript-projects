@@ -1,17 +1,20 @@
 #!python
 """
-Version: 1.0.1
-Released: January 11th, 2026
+Version: 1.0.2
+Released: January 12th, 2026
 Author: ItsVelo
 """
 import minescript as __ms
 
+__version = __ms.version_info()
 __Random = JavaClass("java.util.Random")()
 __GLFW = JavaClass("org.lwjgl.glfw.GLFW")
 __Minecraft = JavaClass("net.minecraft.client.Minecraft")
 __mc = __Minecraft.getInstance()
 __font = __mc.font
-
+if __version.minecraft in ("1.21.10", "1.21.11"):
+    __CharacterEvent = JavaClass("net.minecraft.client.input.CharacterEvent")
+    __KeyEvent = JavaClass("net.minecraft.client.input.KeyEvent")
 
 __PREFIX = "§e[§f sign_lib §e]§f"
 __MAX_LINE_WIDTH = 90
@@ -64,7 +67,7 @@ class Sign:
             screen = __mc.screen
         if not self.__ensure_screen(screen):
             return False
-        screen.keyPressed(__GLFW.GLFW_KEY_ESCAPE, 0, 0)
+        self.__press_key(screen, __CLOSE_SCREEN_KEY)
         return True
 
     def write(self, text: str, min_delay: float = 0.05, max_delay: float = 0.1, autowrap: bool = False, close_screen_when_done: bool = False) -> bool:
@@ -122,7 +125,7 @@ class Sign:
 
             if event.time - previous_char_time > delay:
                 if current_char_index < len(lines[current_line_index]):
-                    screen.charTyped(JavaString(lines[current_line_index]).charAt(current_char_index), JavaInt(0))
+                    self.__write_char(screen, lines[current_line_index][current_char_index])
                     previous_char_time = event.time
                     current_char_index += 1
                     delay = __random_between(min_delay, max_delay)
@@ -138,7 +141,7 @@ class Sign:
                         current_char_index = 0
                         current_line_index += 1
                         delay = __random_between(min_delay, max_delay)
-                        screen.keyPressed(__NEXT_LINE_KEY, 0, 0)
+                        self.__press_key(screen, __NEXT_LINE_KEY)
     
         self.__render_event_listener = __ms.add_event_listener("render", _on_render)
         return True
@@ -155,11 +158,41 @@ class Sign:
         if screen is None:
             __ms.echo(f"{__PREFIX} Error: could not find Sign screen")
             return False
-        elif screen.getClass().getName() not in ("net.minecraft.class_498", "net.minecraft.client.gui.screens.inventory.SignEditScreen"): # net.minecraft.client.gui.screen.ingame.SignEditScreen"
+        elif screen.getClass().getName() not in ("net.minecraft.class_498", "net.minecraft.client.gui.screens.inventory.SignEditScreen"): # net.minecraft.client.gui.screen.ingame.SignEditScreen
             __ms.echo(f"{__PREFIX} Error: found screen, but it wasn't a Sign")
             __ms.echo(f"class: {screen.getClass().getName()}")
             return False
         return True
+
+    def __write_char(self, screen, char):
+        """Write a single character to the sign screen.
+
+        Handles different Minecraft version APIs for character input.
+
+        Args:
+            screen: The sign screen instance.
+            char (str): A single character string to write.
+        """
+        if __version.minecraft in ("1.21.5", "1.21.7", "1.21.8"):
+            screen.charTyped(JavaString(char).charAt(0), JavaInt(0))
+        elif __version.minecraft in ("1.21.10", "1.21.11"):
+            char_code_point = char.codePointAt(0)
+            screen.charTyped(__CharacterEvent(char_code_point, 0))
+
+    def __press_key(self, screen, key):
+        """Simulate a key press on the sign screen.
+
+        Handles different Minecraft version APIs for key input.
+
+        Args:
+            screen: The sign screen instance.
+            key (int): The GLFW key code to simulate.
+        """
+        if __version.minecraft in ("1.21.5", "1.21.7", "1.21.8"):
+            screen.keyPressed(key, 0, 0)
+        elif __version.minecraft in ("1.21.10", "1.21.11"):
+            screen.keyPressed(__KeyEvent(key, 0, 0))
+        
     
     def __wrap(self, string: str) -> str:
         """Wraps the given string to fit within the maximum line width for signs.
